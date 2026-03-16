@@ -7,10 +7,15 @@ logging:
   level: INFO
 
 pipeline:
+  maas:
+    enabled: false
+
   ocr_api:
     api_host: ollama
     api_port: 11434
-    api_key: null
+    api_path: /api/generate
+    model: glm-ocr:latest
+    api_mode: ollama_generate
     connect_timeout: 300
     request_timeout: 300
 
