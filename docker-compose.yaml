@@ -1,7 +1,8 @@
 services:
-  # vLLM in CPU
+
   vllm:
-    image: vllm/vllm-openai:nightly
+    # image: vllm/vllm-openai:nightly-aarch64
+    image: vllm/vllm-openai:nightly-x86_64
     container_name: glm-ocr-vllm
     restart: unless-stopped
     environment:
