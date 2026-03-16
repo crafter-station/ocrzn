@@ -1,0 +1,49 @@
+services:
+  # vLLM in CPU
+  vllm:
+    image: vllm/vllm-openai:nightly
+    container_name: glm-ocr-vllm
+    restart: unless-stopped
+    environment:
+      - VLLM_TARGET_DEVICE=cpu
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    command: >
+      --model zai-org/GLM-OCR
+      --device cpu
+      --served-model-name glm-ocr
+      --port 8080
+      --dtype float32
+      --max-model-len 4096
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 300s
+
+  # Flask API (SDK - GLM-OCR)
+  glm-ocr-server:
+    image: python:3.12-slim
+    container_name: glm-ocr-api
+    restart: unless-stopped
+    depends_on:
+      vllm:
+        condition: service_healthy
+    volumes:
+      - ./config/config.yaml:/app/config.yaml:ro
+      - ./results:/app/results
+      - ./examples:/app/examples:ro
+    working_dir: /app
+    environment:
+      - GLMOCR_CONFIG=/app/config.yaml
+    command: >
+      bash -c "pip install --no-cache-dir 'glmocr[server,selfhosted]' &&
+               python -m glmocr.server --log-level INFO"
+    ports:
+      - "5002:5002"
+
+volumes:
+  huggingface_cache:
