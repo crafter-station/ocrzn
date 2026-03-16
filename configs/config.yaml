@@ -1,16 +1,27 @@
+server:
+  host: "0.0.0.0"
+  port: 5002
+  debug: false
+
+logging:
+  level: INFO
+
 pipeline:
   ocr_api:
-    api_host: vllm
-    api_port: 8080
+    api_host: ollama
+    api_port: 11434
     api_key: null
     connect_timeout: 300
     request_timeout: 300
+
   page_loader:
     max_tokens: 16384
     temperature: 0.01
     image_format: JPEG
     min_pixels: 12544
     max_pixels: 71372800
+
   result_formatter:
     output_format: both
+
   enable_layout: false

@@ -1,38 +1,26 @@
 services:
 
-  vllm:
-    build:
-      context: .
-      dockerfile: Dockerfile.vllm-cpu
-    image: glm-ocr-vllm-cpu          # nombre local tras el build
-    container_name: glm-ocr-vllm
+  ollama:
+    image: ollama/ollama:latest
+    container_name: glm-ocr-ollama
     restart: unless-stopped
-    environment:
-      - VLLM_TARGET_DEVICE=cpu
     volumes:
-      - huggingface_cache:/root/.cache/huggingface
-    command: >
-      --model zai-org/GLM-OCR
-      --device cpu
-      --served-model-name glm-ocr
-      --port 8080
-      --dtype float32
-      --max-model-len 4096
+      - ollama_models:/root/.ollama
     ports:
-      - "8080:8080"
+      - "11434:11434"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 300s
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   glm-ocr-server:
     image: python:3.12-slim
     container_name: glm-ocr-api
     restart: unless-stopped
     depends_on:
-      vllm:
+      ollama:
         condition: service_healthy
     volumes:
       - ./config/config.yaml:/app/config.yaml:ro
@@ -48,4 +36,4 @@ services:
       - "5002:5002"
 
 volumes:
-  huggingface_cache:
+  ollama_models:
