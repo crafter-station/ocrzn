@@ -1,8 +1,10 @@
 services:
 
   vllm:
-    # image: vllm/vllm-openai:nightly-aarch64
-    image: vllm/vllm-openai:nightly-x86_64
+    build:
+      context: .
+      dockerfile: Dockerfile.vllm-cpu
+    image: glm-ocr-vllm-cpu          # nombre local tras el build
     container_name: glm-ocr-vllm
     restart: unless-stopped
     environment:
@@ -25,7 +27,6 @@ services:
       retries: 10
       start_period: 300s
 
-  # Flask API (SDK - GLM-OCR)
   glm-ocr-server:
     image: python:3.12-slim
     container_name: glm-ocr-api
